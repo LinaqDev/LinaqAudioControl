@@ -1,6 +1,7 @@
 ﻿using LinaqAudioControl.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,25 @@ namespace LinaqAudioControl
         {
             InitializeComponent();
             DataContext = new MainViewModel();
+        } 
+
+        private void Slider_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if(sender is Slider s)
+            {
+                // Kill logical focus
+                FocusManager.SetFocusedElement(FocusManager.GetFocusScope(s), null);
+                // Kill keyboard focus
+                Keyboard.ClearFocus();
+            }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            var dc = DataContext as MainViewModel;
+            dc.SaveSettings();
+
+            base.OnClosing(e);
         }
     }
 }
