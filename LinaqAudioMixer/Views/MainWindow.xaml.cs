@@ -25,6 +25,17 @@ namespace LinaqAudioControl
         {
             InitializeComponent();
             DataContext = new MainViewModel();
+        } 
+
+        private void Slider_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if(sender is Slider s)
+            {
+                // Kill logical focus
+                FocusManager.SetFocusedElement(FocusManager.GetFocusScope(s), null);
+                // Kill keyboard focus
+                Keyboard.ClearFocus();
+            }
         }
     }
 }

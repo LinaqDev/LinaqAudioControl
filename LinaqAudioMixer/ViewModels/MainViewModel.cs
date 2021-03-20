@@ -58,11 +58,12 @@ namespace LinaqAudioControl.ViewModels
             SoundDevices = new ObservableCollection<SoundDevice>();
             VolumeUpCmd = new RelayCommand(VolumeUpExe);
             VolumeDownCmd = new RelayCommand(VolumeDownExe);
+            MuteCmd = new RelayCommand(MuteExe);
             LoadDevicesAsync();
-        }
-
+        } 
         public ICommand VolumeUpCmd { get; set; }
         public ICommand VolumeDownCmd { get; set; }
+        public ICommand MuteCmd { get; set; }
 
         private ObservableCollection<SoundDevice> _soundDevices;
         public ObservableCollection<SoundDevice> SoundDevices
@@ -93,6 +94,14 @@ namespace LinaqAudioControl.ViewModels
             if (obj is SoundDevice sd)
             {
                 sd.VolumeUp();
+            }
+        }
+
+        private void MuteExe(object obj)
+        {
+            if (obj is SoundDevice sd)
+            {
+                sd.Mute();
             }
         }
     }
