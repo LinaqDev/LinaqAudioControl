@@ -1,4 +1,7 @@
-﻿using NAudio.CoreAudioApi;
+﻿using LinaqAudioControl.Helpers;
+using LinaqAudioMixer.Models;
+using LinaqAudioMixer.Providers;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -8,6 +11,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace LinaqAudioControl.ViewModels
 {
@@ -47,66 +51,18 @@ namespace LinaqAudioControl.ViewModels
         //}
         #endregion test
 
-        private HashSet<string> idsCache;
-
+        private readonly OutputDeviceProvider outputDeviceProvider;
         public MainViewModel()
         {
+            outputDeviceProvider = new OutputDeviceProvider();
             SoundDevices = new ObservableCollection<SoundDevice>();
-            GetAllInputDevices();
+            VolumeUpCmd = new RelayCommand(VolumeUpExe);
+            VolumeDownCmd = new RelayCommand(VolumeDownExe);
+            LoadDevicesAsync();
         }
 
-
-        public void GetAllInputDevices()
-        {
-            idsCache = new HashSet<string>();
-
-            for (int n = -1; n < WaveOut.DeviceCount; n++)
-            {
-                var caps = WaveOut.GetCapabilities(n);
-                Console.WriteLine($"{n}: {caps.ProductName}");
-            }
-
-            MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
-            int waveOutDevices = WaveOut.DeviceCount;
-            for (int waveOutDevice = 0; waveOutDevice < waveOutDevices; waveOutDevice++)
-            {
-                WaveOutCapabilities deviceInfo = WaveOut.GetCapabilities(waveOutDevice);
-                foreach (MMDevice device in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
-                {
-                    if (idsCache.Contains(device.ID))
-                        continue;
-
-                    if (device.FriendlyName.StartsWith(deviceInfo.ProductName))
-                    {
-                        idsCache.Add(device.ID);
-                        SoundDevices.Add(new SoundDevice(device));
-                    }
-                }
-            }
-        }
-
-        public Dictionary<string, MMDevice> GetInputAudioDevices()
-        {
-            Dictionary<string, MMDevice> retVal = new Dictionary<string, MMDevice>();
-            MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
-            int waveInDevices = WaveIn.DeviceCount;
-            for (int waveInDevice = 0; waveInDevice < waveInDevices; waveInDevice++)
-            {
-                WaveInCapabilities deviceInfo = WaveIn.GetCapabilities(waveInDevice);
-                foreach (MMDevice device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.All))
-                {
-                    if (device.FriendlyName.StartsWith(deviceInfo.ProductName))
-                    {
-                        retVal.Add(device.FriendlyName, device);
-                        break;
-                    }
-                }
-            }
-      
-            return retVal;
-        }
-
-
+        public ICommand VolumeUpCmd { get; set; }
+        public ICommand VolumeDownCmd { get; set; }
 
         private ObservableCollection<SoundDevice> _soundDevices;
         public ObservableCollection<SoundDevice> SoundDevices
@@ -119,18 +75,25 @@ namespace LinaqAudioControl.ViewModels
             }
         }
 
-    }
-
-
-    public class SoundDevice
-    {
-        public SoundDevice(MMDevice device)
+        private async void LoadDevicesAsync()
         {
-            Device = device;
-            this.Name = device.FriendlyName;
+            SoundDevices = new ObservableCollection<SoundDevice>(await outputDeviceProvider.GetAllInputDevicesAsync());
         }
 
-        public string Name { get; set; }
-        public MMDevice Device { get; set; }
+        private void VolumeDownExe(object obj)
+        {
+            if (obj is SoundDevice sd)
+            {
+                sd.VolumeDown();
+            }
+        }
+
+        private void VolumeUpExe(object obj)
+        {
+            if (obj is SoundDevice sd)
+            {
+                sd.VolumeUp();
+            }
+        }
     }
 }

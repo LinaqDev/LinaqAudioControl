@@ -10,7 +10,12 @@
         <ItemsControl ItemsSource="{Binding SoundDevices}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Label Content="{Binding Name}"/> 
+                    <StackPanel>
+                        <Label Content="{Binding Name}"/>
+                        <ProgressBar Value="{Binding CurrentVolume, Mode=OneWay}" Maximum="1" Height="5" Margin="3"/>
+                        <Button Content="+" Command="{Binding DataContext.VolumeUpCmd, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+                        <Button Content="-" Command="{Binding DataContext.VolumeDownCmd, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+                    </StackPanel> 
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
