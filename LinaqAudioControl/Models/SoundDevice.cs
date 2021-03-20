@@ -11,17 +11,33 @@ namespace LinaqAudioMixer.Models
 {
     public class SoundDevice : BaseModel
     {
+        public event EventHandler IsShownChanged;
         public SoundDevice(MMDevice device)
         {
             Device = device;
+            Id = device.ID;
             this.Name = device.FriendlyName;
             CurrentVolume = Device.AudioEndpointVolume.MasterVolumeLevelScalar * 100;
             device.AudioEndpointVolume.OnVolumeNotification += OnUpdateVolume;
             SetIconKind();
         }
 
+        public string Id { get; set; }
         public string Name { get; set; }
         public MMDevice Device { get; set; }
+
+        private bool _isShown;
+        public bool IsShown
+        {
+            get => _isShown;
+            set
+            {
+                _isShown = value;
+                RaisePropertyChanged(nameof(IsShown));
+                IsShownChanged?.Invoke(this, null);
+            }
+        }
+
         private float _currentVolume;
         public float CurrentVolume
         {

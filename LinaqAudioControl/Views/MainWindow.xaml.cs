@@ -1,6 +1,7 @@
 ﻿using LinaqAudioControl.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,6 +37,14 @@ namespace LinaqAudioControl
                 // Kill keyboard focus
                 Keyboard.ClearFocus();
             }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            var dc = DataContext as MainViewModel;
+            dc.SaveSettings();
+
+            base.OnClosing(e);
         }
     }
 }
